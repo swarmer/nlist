@@ -17,32 +17,41 @@ class NList:
                 )
 
             if isinstance(other, NList):
-                self._data = other._data.copy()
-                self._shape = other.shape
-                self._strides = other._strides
+                self._init_from_nlist(other)
             elif isinstance(other, Sequence):
-                shape = [len(other)]
-                values = other
-                while True:
-                    if (all(isinstance(x, Sequence) for x in values) and
-                            len({len(x) for x in values}) == 1):
-                        shape.append(len(values[0]))
-                        values = list(itertools.chain(*values))
-                    else:
-                        break
-                self._shape = tuple(shape)
-                self._build_strides()
-                self._data = values
+                self._init_from_nested(other)
             else:
                 raise TypeError("'other' must be either NList or a Sequence")
         else:
             if shape is None:
                 shape = ()
-            self._check_shape(shape)
+            self._init_from_shape(shape, default)
 
-            self._shape = shape
-            self._build_strides()
-            self._data = [default] * self.size
+    def _init_from_nlist(self, other):
+        self._data = other._data.copy()
+        self._shape = other.shape
+        self._strides = other._strides
+
+    def _init_from_nested(self, other):
+        shape = [len(other)]
+        values = other
+        while True:
+            if (all(isinstance(x, Sequence) for x in values) and
+                    len({len(x) for x in values}) == 1):
+                shape.append(len(values[0]))
+                values = list(itertools.chain(*values))
+            else:
+                break
+        self._shape = tuple(shape)
+        self._build_strides()
+        self._data = values
+
+    def _init_from_shape(self, shape, default):
+        self._check_shape(shape)
+
+        self._shape = shape
+        self._build_strides()
+        self._data = [default] * self.size
 
     def _build_strides(self):
         self._strides = tuple(
@@ -76,15 +85,9 @@ class NList:
         )
 
     def __getitem__(self, key):
-        if isinstance(key, int):
-            key = (key,)
-        self._check_index(key)
         return self._data[self._index_to_flat(key)]
 
     def __setitem__(self, key, value):
-        if isinstance(key, int):
-            key = (key,)
-        self._check_index(key)
         self._data[self._index_to_flat(key)] = value
 
     def copy(self):
@@ -94,9 +97,9 @@ class NList:
         return self._data.count(value)
 
     def _index_to_flat(self, index):
-        return sum(self._strides[k] * index[k] for k in range(self.rank))
+        if isinstance(index, int):
+            index = (index,)
 
-    def _check_index(self, index):
         if self.rank == 0:
             raise TypeError('Cannot index 0-rank NList')
         if len(index) != self.rank:
@@ -106,6 +109,8 @@ class NList:
                 raise TypeError('Indexes must consist of integers')
             if not 0 <= x < self.shape[i]:
                 raise IndexError('NList index out of range')
+
+        return sum(self._strides[k] * index[k] for k in range(self.rank))
 
     @staticmethod
     def _check_shape(shape):
