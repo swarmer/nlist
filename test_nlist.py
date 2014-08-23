@@ -67,6 +67,10 @@ def test_indexing():
         l[1, 3] = 42
     with pytest.raises(IndexError):
         l[1, -1] = 42
+    with pytest.raises(IndexError):
+        NList()[1, 1] = 42
+    with pytest.raises(IndexError):
+        NList(shape=(2, 3, 0, 6))[1, 1] = 42
 
     assert l[0, 0] == 0
     assert l[0, 2] == 2
@@ -80,6 +84,10 @@ def test_indexing():
         l[1, 3]
     with pytest.raises(IndexError):
         l[1, -1]
+    with pytest.raises(IndexError):
+        NList()[1, 1]
+    with pytest.raises(IndexError):
+        NList(shape=(2, 3, 0, 6))[1, 1]
 
 def test_equality():
     assert NList() == NList(shape=())
