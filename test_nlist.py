@@ -10,10 +10,6 @@ def test_init():
     NList(default='useless')
     NList(other=NList(shape=(2, 3)))
 
-    assert NList(other=[[1, 2], [3, 4]]).shape == (2, 2)
-    assert NList(other=[[1, 2], [3]]).shape == (2,)
-    assert NList(other=[]).shape == (0,)
-
     with pytest.raises(RuntimeError):
         NList(other=NList(), shape=(3, 2))
     with pytest.raises(RuntimeError):
@@ -29,30 +25,73 @@ def test_init():
     with pytest.raises(TypeError):
         NList(shape=(2, 'wat'))
 
+def test_init_from_nlist():
+    l = NList(shape=(2, 3), default=42)
+    l[0, 1] = 7
+    l2 = NList(other=l)
+
+    assert l == l2
+    assert l is not l2
+    assert l.shape == l2.shape
+    assert l.rank == l2.rank
+    assert l.size == l2.size
+    assert l[0, 1] == l2[0, 1] == 7
+    assert l[0, 0] == l2[0, 0] == 42
+
+    l2[0, 0] = 56
+    assert l != l2
+    assert l[0, 0] != l2[0, 0] == 56
+
+def test_init_from_nested():
+    l = NList(other=[[1, 2, 3], [4, 5, 6]])
+    assert l.shape == (2, 3)
+    assert l[0, 0] == 1
+    assert l[0, 2] == 3
+    assert l[1, 0] == 4
+    assert l[1, 2] == 6
+
+    l = NList(other=[[1, 2], [3]])
+    assert l.shape == (2,)
+    assert l[0] == [1, 2]
+    assert l[1] == [3]
+
+    assert NList(other=[]).shape == (0,)
+    assert NList(other=[[], []]).shape == (2, 0)
+
+def test_init_from_shape():
+    l = NList(shape=(2, 3), default='d')
+    assert l.shape == (2, 3)
+    assert l.rank == 2
+    assert l.size == 6
+    assert l[0, 0] == 'd'
+
+    assert NList().shape == ()
+    assert NList(shape=(2, 3))[0, 0] == None
+
 def test_shape():
     assert NList().shape == ()
     assert NList(shape=(3, 2)).shape == (3, 2)
 
+    l = NList(shape=(5, 6))
     with pytest.raises(AttributeError):
-        l = NList(shape=(5, 6))
         l.shape = (5, 7)
 
 def test_rank():
     assert NList().rank == 0
     assert NList(shape=(3, 2)).rank == 2
 
+    l = NList(shape=(5, 6))
     with pytest.raises(AttributeError):
-        l = NList(shape=(5, 6))
         l.rank = 8
 
-def test_shape():
+def test_size():
     assert NList().size == 0
     assert NList(shape=(3, 2)).size == 6
     assert NList(shape=(3, 0, 2)).size == 0
     assert NList(shape=(3,)).size == 3
 
+    l = NList(shape=(5, 6))
     with pytest.raises(AttributeError):
-        l = NList(shape=(5, 6))
         l.size = 4
 
 def test_bool():
@@ -76,12 +115,14 @@ def test_indexing():
         l[1, 3] = 42
     with pytest.raises(IndexError):
         l[1, -1] = 42
-    with pytest.raises(IndexError):
+    with pytest.raises(TypeError):
         NList()[1, 1] = 42
-    with pytest.raises(IndexError):
+    with pytest.raises(TypeError):
         NList(shape=(2, 3, 0, 6))[1, 1] = 42
     with pytest.raises(TypeError):
         l[1, 'wat'] = 42
+    with pytest.raises(TypeError):
+        NList()[()] = 42
 
     assert l[0, 0] == 0
     assert l[0, 2] == 2
@@ -95,12 +136,23 @@ def test_indexing():
         l[1, 3]
     with pytest.raises(IndexError):
         l[1, -1]
-    with pytest.raises(IndexError):
+    with pytest.raises(TypeError):
         NList()[1, 1]
-    with pytest.raises(IndexError):
+    with pytest.raises(TypeError):
         NList(shape=(2, 3, 0, 6))[1, 1]
     with pytest.raises(TypeError):
         l[1, 'wat']
+    with pytest.raises(TypeError):
+        NList()[()]
+
+    l = NList(shape=(3,), default=42)
+    assert l[0] == 42
+    l[1] = 1
+    assert l[1] == 1
+    with pytest.raises(IndexError):
+        l[3]
+    with pytest.raises(IndexError):
+        l[-1]
 
 def test_equality():
     assert NList() == NList(shape=())
@@ -122,10 +174,10 @@ def test_equality():
 def test_copy():
     l = NList(shape=(2, 3), default=42)
     l[0, 1] = 7
-    assert l == NList(l) == l.copy()
-    assert l is not NList(l) and l is not l.copy()
-
     l2 = l.copy()
+
+    assert l == l2
+    assert l is not l2
     assert l.shape == l2.shape
     assert l.rank == l2.rank
     assert l.size == l2.size

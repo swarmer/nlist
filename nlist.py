@@ -76,10 +76,14 @@ class NList:
         )
 
     def __getitem__(self, key):
+        if isinstance(key, int):
+            key = (key,)
         self._check_index(key)
         return self._data[self._index_to_flat(key)]
 
     def __setitem__(self, key, value):
+        if isinstance(key, int):
+            key = (key,)
         self._check_index(key)
         self._data[self._index_to_flat(key)] = value
 
@@ -93,6 +97,10 @@ class NList:
         return sum(self._strides[k] * index[k] for k in range(self.rank))
 
     def _check_index(self, index):
+        if self.rank == 0:
+            raise TypeError('Cannot index 0-rank NList')
+        if len(index) != self.rank:
+            raise TypeError('NList index must be rank %s' % self.rank)
         for i, x in enumerate(index):
             if not isinstance(x, int):
                 raise TypeError('Indexes must consist of integers')
@@ -101,8 +109,11 @@ class NList:
 
     @staticmethod
     def _check_shape(shape):
-        if not all(x >= 0 for x in shape):
-            raise ValueError('Dimensions cannot be negative')
+        for x in shape:
+            if not isinstance(x, int):
+                raise TypeError('Dimensions must be integers')
+            if x < 0:
+                raise ValueError('Dimensions cannot be negative')
 
 #Container.register(NList)
 #Iterable.register(NList)
