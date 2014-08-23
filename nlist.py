@@ -1,5 +1,6 @@
 import operator
-from collections.abc import Container, Iterable
+import itertools
+from collections.abc import Container, Iterable, Sequence
 from functools import reduce
 
 
@@ -15,20 +16,39 @@ class NList:
                     "'other' and 'shape'/'default' arguments are mutually exclusive"
                 )
 
-            self._data = other._data.copy()
-            self._shape = other.shape
-            self._strides = other._strides
+            if isinstance(other, NList):
+                self._data = other._data.copy()
+                self._shape = other.shape
+                self._strides = other._strides
+            elif isinstance(other, Sequence):
+                shape = [len(other)]
+                values = other
+                while True:
+                    if (all(isinstance(x, Sequence) for x in values) and
+                            len({len(x) for x in values}) == 1):
+                        shape.append(len(values[0]))
+                        values = list(itertools.chain(*values))
+                    else:
+                        break
+                self._shape = tuple(shape)
+                self._build_strides()
+                self._data = values
+            else:
+                raise TypeError("'other' must be either NList or a Sequence")
         else:
             if shape is None:
                 shape = ()
             self._check_shape(shape)
 
             self._shape = shape
+            self._build_strides()
             self._data = [default] * self.size
-            self._strides = tuple(
-                product(self.shape[j] for j in range(k + 1, self.rank))
-                for k in range(self.rank)
-            )
+
+    def _build_strides(self):
+        self._strides = tuple(
+            product(self.shape[j] for j in range(k + 1, self.rank))
+            for k in range(self.rank)
+        )
 
     @property
     def shape(self):
@@ -73,8 +93,11 @@ class NList:
         return sum(self._strides[k] * index[k] for k in range(self.rank))
 
     def _check_index(self, index):
-        if not all(0 <= x < self.shape[i] for i, x in enumerate(index)):
-            raise IndexError('NList index out of range')
+        for i, x in enumerate(index):
+            if not isinstance(x, int):
+                raise TypeError('Indexes must consist of integers')
+            if not 0 <= x < self.shape[i]:
+                raise IndexError('NList index out of range')
 
     @staticmethod
     def _check_shape(shape):

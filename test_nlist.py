@@ -3,22 +3,31 @@ from nlist import NList
 
 
 def test_init():
-    l = NList()
-    l = NList(shape=(2, 3))
-    l = NList(shape=(2, 0))
-    l = NList(shape=(2, 3), default=42)
-    l = NList(default='useless')
-    l = NList(other=NList(shape=(2, 3)))
+    NList()
+    NList(shape=(2, 3))
+    NList(shape=(2, 0))
+    NList(shape=(2, 3), default=42)
+    NList(default='useless')
+    NList(other=NList(shape=(2, 3)))
+
+    assert NList(other=[[1, 2], [3, 4]]).shape == (2, 2)
+    assert NList(other=[[1, 2], [3]]).shape == (2,)
+    assert NList(other=[]).shape == (0,)
 
     with pytest.raises(RuntimeError):
-        l = NList(other=NList(), shape=(3, 2))
+        NList(other=NList(), shape=(3, 2))
     with pytest.raises(RuntimeError):
-        l = NList(other=NList(), default=42)
+        NList(other=NList(), default=42)
     with pytest.raises(RuntimeError):
-        l = NList(other=NList(), shape=(3, 2), default=42)
+        NList(other=NList(), shape=(3, 2), default=42)
 
     with pytest.raises(ValueError):
-        l = NList(shape=(2, -1, 3))
+        NList(shape=(2, -1, 3))
+
+    with pytest.raises(TypeError):
+        NList(other=4)
+    with pytest.raises(TypeError):
+        NList(shape=(2, 'wat'))
 
 def test_shape():
     assert NList().shape == ()
@@ -71,6 +80,8 @@ def test_indexing():
         NList()[1, 1] = 42
     with pytest.raises(IndexError):
         NList(shape=(2, 3, 0, 6))[1, 1] = 42
+    with pytest.raises(TypeError):
+        l[1, 'wat'] = 42
 
     assert l[0, 0] == 0
     assert l[0, 2] == 2
@@ -88,6 +99,8 @@ def test_indexing():
         NList()[1, 1]
     with pytest.raises(IndexError):
         NList(shape=(2, 3, 0, 6))[1, 1]
+    with pytest.raises(TypeError):
+        l[1, 'wat']
 
 def test_equality():
     assert NList() == NList(shape=())
