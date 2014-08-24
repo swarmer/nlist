@@ -1,11 +1,20 @@
 import operator
 import itertools
+from itertools import islice
 from collections.abc import Container, Iterable, Sequence
 from functools import reduce
 
 
 def product(l):
     return reduce(operator.mul, l, 1)
+
+def group_every_n(l, n):
+    rest = l
+    while True:
+        group, rest = list(islice(rest, n)), islice(rest, n, None)
+        if not group:
+            break
+        yield group
 
 
 class NList:
@@ -93,11 +102,27 @@ class NList:
     def __iter__(self):
         return iter(self._data)
 
+    def __repr__(self):
+        nested = self._to_nested()
+        return 'NList(%s, shape=%s)' % (nested, self.shape)
+
+    def __str__(self):
+        return repr(self)
+
     def copy(self):
         return type(self)(other=self)
 
     def count(self, value):
         return self._data.count(value)
+
+    def _to_nested(self):
+        if self.size == 0:
+            return []
+
+        nested = self._data
+        for dim in reversed(self.shape[1:]):
+            nested = group_every_n(nested, dim)
+        return list(nested)
 
     def _index_to_flat(self, index):
         if isinstance(index, int):

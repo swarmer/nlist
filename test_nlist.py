@@ -208,3 +208,15 @@ def test_iter():
     assert 56 in NList([[1, 2, 3], [4, 56, 42]])
     assert 78 not in NList([5, 8, 9])
     assert 7 in NList(shape=(5, 8), default=7)
+
+def test_str():
+    l = NList()
+    assert str(l) == repr(l) == 'NList([], shape=())'
+    l = NList([1, 2, 3])
+    assert str(l) == repr(l) == 'NList([1, 2, 3], shape=(3,))'
+    l = NList([[1, 2, 3], [4, 5, 6]])
+    assert str(l) == repr(l) == 'NList([[1, 2, 3], [4, 5, 6]], shape=(2, 3))'
+    l = NList([])
+    assert str(l) == repr(l) == 'NList([], shape=(0,))'
+    l = NList(shape=(5, 3, 0))
+    assert str(l) == repr(l) == 'NList([], shape=(5, 3, 0))'
