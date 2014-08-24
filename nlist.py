@@ -11,7 +11,8 @@ def product(l):
 def group_every_n(l, n):
     rest = l
     while True:
-        group, rest = list(islice(rest, n)), islice(rest, n, None)
+        rest1, rest2 = itertools.tee(rest)
+        group, rest = list(islice(rest1, n)), islice(rest2, n, None)
         if not group:
             break
         yield group

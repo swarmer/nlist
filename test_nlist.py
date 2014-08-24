@@ -58,6 +58,10 @@ def test_init_from_nested():
 
     assert NList(other=[]).shape == (0,)
     assert NList(other=[[], []]).shape == (2, 0)
+    assert NList(other=[
+        [[1, 2, 3], [4, 5, 6]],
+        [[7, 8, 9], [10, 11, 12]]
+    ]).shape == (2, 2, 3)
 
 def test_init_from_shape():
     l = NList(shape=(2, 3), default='d')
@@ -155,6 +159,14 @@ def test_indexing():
     with pytest.raises(TypeError):
         l[0]
 
+    l = NList([
+        [[1, 2, 3], [4, 5, 6]],
+        [[7, 8, 9], [10, 11, 12]]
+    ])
+    assert l[0, 0, 0] == 1
+    assert l[1, 1, 1] == 11
+    assert l[1, 0, 2] == 9
+
 def test_equality():
     assert NList() == NList(shape=())
     assert NList(shape=(3, 2), default=1) == NList(shape=(3, 2), default=1)
@@ -223,6 +235,10 @@ def test_str():
     assert str(l) == repr(l) == 'NList([], shape=(0,))'
     l = NList(shape=(5, 3, 0))
     assert str(l) == repr(l) == 'NList([], shape=(5, 3, 0))'
+    assert str(NList([
+        [[1, 2, 3], [4, 5, 6]],
+        [[7, 8, 9], [10, 11, 12]]
+    ])) == 'NList([[[1, 2, 3], [4, 5, 6]], [[7, 8, 9], [10, 11, 12]]], shape=(2, 2, 3))'
 
 def test_keys():
     assert list(NList().keys()) == [()]
