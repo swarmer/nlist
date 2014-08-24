@@ -196,3 +196,15 @@ def test_count():
     l[0, 1] = 5
     assert l.count(7) == 5
     assert l.count(5) == 1
+
+def test_iter():
+    l = NList([1, 2, 3])
+    assert list(iter(l)) == [1, 2, 3]
+    assert list(NList()) == []
+    assert list(NList([[1, 2, 3], [4, 5, 6]])) == [1, 2, 3, 4, 5, 6]
+    assert max(NList([[5, 2, 3], [1, 2, 5], [7, 9, 2]])) == 9
+
+    assert None not in NList()
+    assert 56 in NList([[1, 2, 3], [4, 56, 42]])
+    assert 78 not in NList([5, 8, 9])
+    assert 7 in NList(shape=(5, 8), default=7)

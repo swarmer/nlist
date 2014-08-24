@@ -90,6 +90,9 @@ class NList:
     def __setitem__(self, key, value):
         self._data[self._index_to_flat(key)] = value
 
+    def __iter__(self):
+        return iter(self._data)
+
     def copy(self):
         return type(self)(other=self)
 
@@ -120,5 +123,5 @@ class NList:
             if x < 0:
                 raise ValueError('Dimensions cannot be negative')
 
-#Container.register(NList)
-#Iterable.register(NList)
+Container.register(NList)
+Iterable.register(NList)
