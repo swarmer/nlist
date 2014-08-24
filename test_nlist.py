@@ -52,8 +52,8 @@ def test_init_from_nested():
 
     l = NList(other=[[1, 2], [3]])
     assert l.shape == (2,)
-    assert l[0] == [1, 2]
-    assert l[1] == [3]
+    assert l[0,] == [1, 2]
+    assert l[1,] == [3]
 
     assert NList(other=[]).shape == (0,)
     assert NList(other=[[], []]).shape == (2, 0)
@@ -148,13 +148,11 @@ def test_indexing():
     assert l[()] == 42
 
     l = NList(shape=(3,), default=42)
-    assert l[0] == 42
-    l[1] = 1
-    assert l[1] == 1
-    with pytest.raises(IndexError):
-        l[3]
-    with pytest.raises(IndexError):
-        l[-1]
+    assert l[0,] == 42
+    l[1,] = 1
+    assert l[1,] == 1
+    with pytest.raises(TypeError):
+        l[0]
 
 def test_equality():
     assert NList() == NList(shape=())

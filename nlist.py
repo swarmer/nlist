@@ -147,6 +147,8 @@ class NList:
         return list(nested)
 
     def _check_index(self, index):
+        if not isinstance(index, tuple):
+            raise TypeError('NList index must be a tuple')
         if len(index) != self.rank:
             raise TypeError('NList index must be rank %s' % self.rank)
         for i, x in enumerate(index):
@@ -156,11 +158,7 @@ class NList:
                 raise IndexError('NList index out of range')
 
     def _index_to_flat(self, index):
-        if isinstance(index, int):
-            index = (index,)
-
         self._check_index(index)
-
         return sum(self._strides[k] * index[k] for k in range(self.rank))
 
     @staticmethod
