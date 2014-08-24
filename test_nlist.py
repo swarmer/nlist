@@ -1,4 +1,5 @@
 import pytest
+import collections.abc
 from nlist import NList
 
 
@@ -240,3 +241,7 @@ def test_enumerate():
         ((0, 0), 1), ((0, 1), 2), ((0, 2), 3),
         ((1, 0), 4), ((1, 1), 5), ((1, 2), 6)
     ]
+
+def test_abc():
+    assert isinstance(NList(), collections.abc.Container)
+    assert isinstance(NList(), collections.abc.Iterable)
