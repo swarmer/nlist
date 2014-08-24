@@ -115,6 +115,27 @@ class NList:
     def count(self, value):
         return self._data.count(value)
 
+    def keys(self, start=None):
+        if self.size == 0:
+            return
+
+        current = ([0] * self.rank) if start is None else start
+        while True:
+            yield tuple(current)
+
+            i = self.rank - 1
+            current[i] += 1
+            while current[i] >= self.shape[i]:
+                current[i] = 0
+                i -= 1
+                if i < 0:
+                    return
+                current[i] += 1
+
+    def enumerate(self, start=None):
+        for key in self.keys(start):
+            yield (key, self[key])
+
     def _to_nested(self):
         if self.size == 0:
             return []
@@ -124,12 +145,7 @@ class NList:
             nested = group_every_n(nested, dim)
         return list(nested)
 
-    def _index_to_flat(self, index):
-        if isinstance(index, int):
-            index = (index,)
-
-        if self.rank == 0:
-            raise TypeError('Cannot index 0-rank NList')
+    def _check_index(self, index):
         if len(index) != self.rank:
             raise TypeError('NList index must be rank %s' % self.rank)
         for i, x in enumerate(index):
@@ -137,6 +153,14 @@ class NList:
                 raise TypeError('Indexes must consist of integers')
             if not 0 <= x < self.shape[i]:
                 raise IndexError('NList index out of range')
+
+    def _index_to_flat(self, index):
+        if isinstance(index, int):
+            index = (index,)
+
+        if self.rank == 0:
+            raise TypeError('Cannot index 0-rank NList')
+        self._check_index(index)
 
         return sum(self._strides[k] * index[k] for k in range(self.rank))
 

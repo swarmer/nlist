@@ -220,3 +220,21 @@ def test_str():
     assert str(l) == repr(l) == 'NList([], shape=(0,))'
     l = NList(shape=(5, 3, 0))
     assert str(l) == repr(l) == 'NList([], shape=(5, 3, 0))'
+
+def test_keys():
+    assert list(NList().keys()) == []
+    assert list(NList(shape=(5, 0, 3)).keys()) == []
+    assert list(NList([1, 2, 3]).keys()) == [(0,), (1, ), (2, )]
+    assert list(NList([[1, 2, 3], [4, 5, 6]]).keys()) == [
+        (0, 0), (0, 1), (0, 2),
+        (1, 0), (1, 1), (1, 2)
+    ]
+
+def test_enumerate():
+    assert list(NList().enumerate()) == []
+    assert list(NList(shape=(5, 0, 3)).enumerate()) == []
+    assert list(NList([1, 2, 3]).enumerate()) == [((0,), 1), ((1,), 2), ((2, ), 3)]
+    assert list(NList([[1, 2, 3], [4, 5, 6]]).enumerate()) == [
+        ((0, 0), 1), ((0, 1), 2), ((0, 2), 3),
+        ((1, 0), 4), ((1, 1), 5), ((1, 2), 6)
+    ]
