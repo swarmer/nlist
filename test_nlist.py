@@ -244,10 +244,28 @@ def test_keys():
     assert list(NList().keys()) == [()]
     assert list(NList(shape=(5, 0, 3)).keys()) == []
     assert list(NList([1, 2, 3]).keys()) == [(0,), (1, ), (2, )]
-    assert list(NList([[1, 2, 3], [4, 5, 6]]).keys()) == [
+
+    l = NList([[1, 2, 3], [4, 5, 6]])
+    assert list(l.keys()) == [
         (0, 0), (0, 1), (0, 2),
         (1, 0), (1, 1), (1, 2)
     ]
+    assert list(l.keys(stop=(500, 200))) == [
+        (0, 0), (0, 1), (0, 2),
+        (1, 0), (1, 1), (1, 2)
+    ]
+    assert list(l.keys(start=(0, 2))) == [(0, 2), (1, 0), (1, 1), (1, 2)]
+    assert list(l.keys(start=(0, 2), stop=(1, 1))) == [(0, 2), (1, 0)]
+    assert list(l.keys(start=(900, 1000))) == []
+
+    with pytest.raises(TypeError):
+        list(NList().keys(start='wat'))
+    with pytest.raises(TypeError):
+        list(NList().keys(start=(), stop='wat'))
+    with pytest.raises(TypeError):
+        list(NList().keys(start=(1, 2)))
+    with pytest.raises(TypeError):
+        list(NList().keys(stop=(5, 6)))
 
 def test_enumerate():
     assert list(NList().enumerate()) == [((), None)]
@@ -261,3 +279,16 @@ def test_enumerate():
 def test_abc():
     assert isinstance(NList(), collections.abc.Container)
     assert isinstance(NList(), collections.abc.Iterable)
+
+def test_index():
+    l = NList([[1, 5, 8], [4, 5, 6]])
+    assert l.index(5) == (0, 1)
+    assert l.index(4) == (1, 0)
+    assert l.index(6) == (1, 2)
+    assert l.index(5, start=(0, 2)) == (1, 1)
+    with pytest.raises(ValueError):
+        l.index(10)
+    with pytest.raises(ValueError):
+        l.index(1, stop=(0, 0))
+
+    assert NList().index(None) == ()

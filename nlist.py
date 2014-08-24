@@ -113,12 +113,21 @@ class NList:
     def count(self, value):
         return self._data.count(value)
 
-    def keys(self):
+    def keys(self, start=None, stop=None):
+        if start is None:
+            start = (0,) * self.rank
+        self._check_index(start)
+        if stop is not None:
+            self._check_index(stop)
+
         if self.size == 0:
             return
 
-        current = ([0] * self.rank)
+        current = list(start)
         while True:
+            if ((stop is not None and tuple(current) >= stop) or
+                    not self._in_bounds(tuple(current))):
+                return
             yield tuple(current)
             if self.rank == 0:
                 return
@@ -136,6 +145,12 @@ class NList:
         for key in self.keys():
             yield (key, self[key])
 
+    def index(self, value, start=None, stop=None):
+        for key in self.keys(start, stop):
+            if self[key] == value:
+                return key
+        raise ValueError('%s is not in the NList' % value)
+
     def _to_nested(self):
         if self.rank == 0:
             return self._data[0]
@@ -152,14 +167,19 @@ class NList:
             raise TypeError('NList index must be a tuple')
         if len(index) != self.rank:
             raise TypeError('NList index must be rank %s' % self.rank)
+        if any(not isinstance(x, int) for x in index):
+            raise TypeError('Indexes must consist of integers')
+
+    def _in_bounds(self, index):
         for i, x in enumerate(index):
-            if not isinstance(x, int):
-                raise TypeError('Indexes must consist of integers')
             if not 0 <= x < self.shape[i]:
-                raise IndexError('NList index out of range')
+                return False
+        return True
 
     def _index_to_flat(self, index):
         self._check_index(index)
+        if not self._in_bounds(index):
+            raise IndexError('NList index out of range')
         return sum(self._strides[k] * index[k] for k in range(self.rank))
 
     @staticmethod
