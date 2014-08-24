@@ -66,6 +66,8 @@ def test_init_from_shape():
     assert l[0, 0] == 'd'
 
     assert NList().shape == ()
+    assert NList()[()] == None
+    assert NList(default=42)[()] == 42
     assert NList(shape=(2, 3))[0, 0] == None
 
 def test_shape():
@@ -85,7 +87,7 @@ def test_rank():
         l.rank = 8
 
 def test_size():
-    assert NList().size == 0
+    assert NList().size == 1
     assert NList(shape=(3, 2)).size == 6
     assert NList(shape=(3, 0, 2)).size == 0
     assert NList(shape=(3,)).size == 3
@@ -95,7 +97,7 @@ def test_size():
         l.size = 4
 
 def test_bool():
-    assert bool(NList()) == False
+    assert bool(NList()) == True
     assert bool(NList(shape=(2, 3))) == True
     assert bool(NList(shape=(3, 0, 2))) == False
 
@@ -121,8 +123,6 @@ def test_indexing():
         NList(shape=(2, 3, 0, 6))[1, 1] = 42
     with pytest.raises(TypeError):
         l[1, 'wat'] = 42
-    with pytest.raises(TypeError):
-        NList()[()] = 42
 
     assert l[0, 0] == 0
     assert l[0, 2] == 2
@@ -142,8 +142,10 @@ def test_indexing():
         NList(shape=(2, 3, 0, 6))[1, 1]
     with pytest.raises(TypeError):
         l[1, 'wat']
-    with pytest.raises(TypeError):
-        NList()[()]
+
+    l = NList()
+    l[()] = 42
+    assert l[()] == 42
 
     l = NList(shape=(3,), default=42)
     assert l[0] == 42
@@ -190,6 +192,7 @@ def test_copy():
 
 def test_count():
     assert NList().count('wat') == 0
+    assert NList(default='wat').count('wat') == 1
 
     l = NList(shape=(2, 3), default=7)
     assert l.count(7) == 6
@@ -200,18 +203,19 @@ def test_count():
 def test_iter():
     l = NList([1, 2, 3])
     assert list(iter(l)) == [1, 2, 3]
-    assert list(NList()) == []
+    assert list(NList()) == [None]
     assert list(NList([[1, 2, 3], [4, 5, 6]])) == [1, 2, 3, 4, 5, 6]
     assert max(NList([[5, 2, 3], [1, 2, 5], [7, 9, 2]])) == 9
 
-    assert None not in NList()
+    assert None in NList()
+    assert None not in NList(shape=(2, 0, 3))
     assert 56 in NList([[1, 2, 3], [4, 56, 42]])
     assert 78 not in NList([5, 8, 9])
     assert 7 in NList(shape=(5, 8), default=7)
 
 def test_str():
     l = NList()
-    assert str(l) == repr(l) == 'NList([], shape=())'
+    assert str(l) == repr(l) == 'NList(None, shape=())'
     l = NList([1, 2, 3])
     assert str(l) == repr(l) == 'NList([1, 2, 3], shape=(3,))'
     l = NList([[1, 2, 3], [4, 5, 6]])
@@ -222,7 +226,7 @@ def test_str():
     assert str(l) == repr(l) == 'NList([], shape=(5, 3, 0))'
 
 def test_keys():
-    assert list(NList().keys()) == []
+    assert list(NList().keys()) == [()]
     assert list(NList(shape=(5, 0, 3)).keys()) == []
     assert list(NList([1, 2, 3]).keys()) == [(0,), (1, ), (2, )]
     assert list(NList([[1, 2, 3], [4, 5, 6]]).keys()) == [
@@ -231,7 +235,7 @@ def test_keys():
     ]
 
 def test_enumerate():
-    assert list(NList().enumerate()) == []
+    assert list(NList().enumerate()) == [((), None)]
     assert list(NList(shape=(5, 0, 3)).enumerate()) == []
     assert list(NList([1, 2, 3]).enumerate()) == [((0,), 1), ((1,), 2), ((2, ), 3)]
     assert list(NList([[1, 2, 3], [4, 5, 6]]).enumerate()) == [

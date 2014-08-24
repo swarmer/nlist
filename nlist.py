@@ -78,10 +78,7 @@ class NList:
 
     @property
     def size(self):
-        if self.shape == ():
-            return 0
-        else:
-            return product(self.shape)
+        return product(self.shape)
 
     def __bool__(self):
         return self.size != 0
@@ -115,13 +112,15 @@ class NList:
     def count(self, value):
         return self._data.count(value)
 
-    def keys(self, start=None):
+    def keys(self):
         if self.size == 0:
             return
 
-        current = ([0] * self.rank) if start is None else start
+        current = ([0] * self.rank)
         while True:
             yield tuple(current)
+            if self.rank == 0:
+                return
 
             i = self.rank - 1
             current[i] += 1
@@ -132,11 +131,13 @@ class NList:
                     return
                 current[i] += 1
 
-    def enumerate(self, start=None):
-        for key in self.keys(start):
+    def enumerate(self):
+        for key in self.keys():
             yield (key, self[key])
 
     def _to_nested(self):
+        if self.rank == 0:
+            return self._data[0]
         if self.size == 0:
             return []
 
@@ -158,8 +159,6 @@ class NList:
         if isinstance(index, int):
             index = (index,)
 
-        if self.rank == 0:
-            raise TypeError('Cannot index 0-rank NList')
         self._check_index(index)
 
         return sum(self._strides[k] * index[k] for k in range(self.rank))
