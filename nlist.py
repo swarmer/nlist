@@ -114,34 +114,38 @@ class NList:
         return self._data.count(value)
 
     def keys(self, start=None, stop=None):
-        if start is None:
+        if start is not None:
+            self._check_index(start)
+        else:
             start = (0,) * self.rank
-        self._check_index(start)
         if stop is not None:
             self._check_index(stop)
-            self._check_bounds(stop)
 
-        if self.size == 0:
-            return
-        self._check_bounds(start)
+        current = start
+        while self._index_in_range(current, stop):
+            yield current
+            current = self._next_index(current)
 
-        current = list(start)
-        while True:
-            if ((stop is not None and tuple(current) >= stop) or
-                    not self._in_bounds(tuple(current))):
-                return
-            yield tuple(current)
-            if self.rank == 0:
-                return
+    def _index_in_range(self, index, stop):
+        return (
+            index is not None and
+            self._in_bounds(index) and
+            (stop is None or index < stop)
+        )
 
-            i = self.rank - 1
+    def _next_index(self, index):
+        current = list(index)
+        i = self.rank - 1
+        while i >= 0:
             current[i] += 1
-            while current[i] >= self.shape[i]:
+
+            if current[i] >= self.shape[i]:
                 current[i] = 0
                 i -= 1
-                if i < 0:
-                    return
-                current[i] += 1
+            else:
+                return tuple(current)
+        else:
+            return None
 
     def enumerate(self):
         for key in self.keys():
@@ -171,6 +175,8 @@ class NList:
             raise TypeError('NList index must be rank %s' % self.rank)
         if any(not isinstance(x, int) for x in index):
             raise TypeError('Indexes must consist of integers')
+        if not self._in_bounds(index):
+            raise IndexError('NList index out of range')
 
     def _in_bounds(self, index):
         for i, x in enumerate(index):
@@ -178,13 +184,8 @@ class NList:
                 return False
         return True
 
-    def _check_bounds(self, index):
-        if not self._in_bounds(index):
-            raise IndexError('NList index out of range')
-
     def _index_to_flat(self, index):
         self._check_index(index)
-        self._check_bounds(index)
         return sum(self._strides[k] * index[k] for k in range(self.rank))
 
     @staticmethod
