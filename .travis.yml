@@ -5,6 +5,6 @@ install:
   - pip install -r dev_requirements.txt
   - pip install coveralls
 script:
-  coverage run --source=nlist py.test
+  coverage run --source=nlist -m py.test
 after_success:
   coveralls
