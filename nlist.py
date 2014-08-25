@@ -119,9 +119,11 @@ class NList:
         self._check_index(start)
         if stop is not None:
             self._check_index(stop)
+            self._check_bounds(stop)
 
         if self.size == 0:
             return
+        self._check_bounds(start)
 
         current = list(start)
         while True:
@@ -176,10 +178,13 @@ class NList:
                 return False
         return True
 
-    def _index_to_flat(self, index):
-        self._check_index(index)
+    def _check_bounds(self, index):
         if not self._in_bounds(index):
             raise IndexError('NList index out of range')
+
+    def _index_to_flat(self, index):
+        self._check_index(index)
+        self._check_bounds(index)
         return sum(self._strides[k] * index[k] for k in range(self.rank))
 
     @staticmethod

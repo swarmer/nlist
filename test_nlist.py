@@ -250,13 +250,17 @@ def test_keys():
         (0, 0), (0, 1), (0, 2),
         (1, 0), (1, 1), (1, 2)
     ]
-    assert list(l.keys(stop=(500, 200))) == [
-        (0, 0), (0, 1), (0, 2),
-        (1, 0), (1, 1), (1, 2)
-    ]
     assert list(l.keys(start=(0, 2))) == [(0, 2), (1, 0), (1, 1), (1, 2)]
     assert list(l.keys(start=(0, 2), stop=(1, 1))) == [(0, 2), (1, 0)]
-    assert list(l.keys(start=(900, 1000))) == []
+    assert list(l.keys(start=(1, 1), stop=(0, 0))) == []
+    with pytest.raises(IndexError):
+        list(l.keys(start=(900, 1000)))
+    with pytest.raises(IndexError):
+        list(l.keys(start=(0, 1000)))
+    with pytest.raises(IndexError):
+        list(l.keys(stop=(900, 1000)))
+    with pytest.raises(IndexError):
+        list(l.keys(stop=(0, 1000)))
 
     with pytest.raises(TypeError):
         list(NList().keys(start='wat'))
@@ -313,6 +317,12 @@ def test_index():
         l.index(1, stop=(0, 0))
     with pytest.raises(ValueError):
         l.index(5, start=(0, 1), stop=(0, 1))
+    with pytest.raises(ValueError):
+        l.index(5, start=(1, 0), stop=(0, 1))
+    with pytest.raises(IndexError):
+        l.index(5, start=(0, 100))
+    with pytest.raises(IndexError):
+        l.index(5, stop=(0, 100))
 
     assert NList().index(None) == ()
     assert NList().index(None, start=()) == ()
