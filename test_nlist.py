@@ -8,7 +8,7 @@ def test_init():
     NList(shape=(2, 3))
     NList(shape=(2, 0))
     NList(shape=(2, 3), default=42)
-    NList(default='useless')
+    NList(default='foo')
     NList(other=NList(shape=(2, 3)))
 
     with pytest.raises(RuntimeError):
@@ -267,6 +267,26 @@ def test_keys():
     with pytest.raises(TypeError):
         list(NList().keys(stop=(5, 6)))
 
+    l = NList([
+        [[1, 2, 3], [4, 5, 6]],
+        [[7, 8, 9], [10, 11, 12]]
+    ])
+    assert list(l.keys()) == [
+        (0, 0, 0), (0, 0, 1), (0, 0, 2),
+        (0, 1, 0), (0, 1, 1), (0, 1, 2),
+        (1, 0, 0), (1, 0, 1), (1, 0, 2),
+        (1, 1, 0), (1, 1, 1), (1, 1, 2),
+    ]
+    assert list(l.keys(start=(0, 1, 1))) == [
+        (0, 1, 1), (0, 1, 2),
+        (1, 0, 0), (1, 0, 1), (1, 0, 2),
+        (1, 1, 0), (1, 1, 1), (1, 1, 2),
+    ]
+    assert list(l.keys(start=(0, 1, 1), stop=(1, 1, 0))) == [
+        (0, 1, 1), (0, 1, 2),
+        (1, 0, 0), (1, 0, 1), (1, 0, 2),
+    ]
+
 def test_enumerate():
     assert list(NList().enumerate()) == [((), None)]
     assert list(NList(shape=(5, 0, 3)).enumerate()) == []
@@ -283,6 +303,7 @@ def test_abc():
 def test_index():
     l = NList([[1, 5, 8], [4, 5, 6]])
     assert l.index(5) == (0, 1)
+    assert l.index(5, start=(0, 1)) == (0, 1)
     assert l.index(4) == (1, 0)
     assert l.index(6) == (1, 2)
     assert l.index(5, start=(0, 2)) == (1, 1)
@@ -290,5 +311,12 @@ def test_index():
         l.index(10)
     with pytest.raises(ValueError):
         l.index(1, stop=(0, 0))
+    with pytest.raises(ValueError):
+        l.index(5, start=(0, 1), stop=(0, 1))
 
     assert NList().index(None) == ()
+    assert NList().index(None, start=()) == ()
+    with pytest.raises(ValueError):
+        NList().index(None, stop=())
+    with pytest.raises(ValueError):
+        NList().index(None, start=(), stop=())
