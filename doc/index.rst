@@ -19,6 +19,7 @@ Example code
 Installation
 ------------
 ``pip install nlist``
+
 Or just grab ``nlist.py``.
 
 

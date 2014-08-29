@@ -32,6 +32,7 @@ Documentation
 Installation
 ------------
 ``pip install nlist``
+
 Or just grab ``nlist.py``.
 
 
