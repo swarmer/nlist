@@ -1,3 +1,28 @@
+__all__ = ['NList']
+__doc__ = """This module provides class :class:`NList`, a multidimensional list.
+
+Indexes and shapes used with NList must be tuples.
+Example:
+::
+
+    l = nlist.NList(shape=(2, 3))
+    l[1, 2] = 42
+
+NList's shape can be an empty tuple meaning a zero-dimensional list that has
+one element with index ().
+
+NList converts to False only if its :attr:`size` is 0, meaning that
+at least one of its dimensions is 0. Note that the :attr:`size` of a
+zero-dimensional NList is 1.
+
+An NList equals another NList if their shapes and all their elements are equal.
+
+NList is an iterable of all its elements.
+
+Whenever an ordering of indexes is implied,
+standard tuple comparison semantics are used.
+"""
+
 import operator
 import itertools
 from itertools import islice
@@ -19,7 +44,16 @@ def group_every_n(l, n):
 
 
 class NList:
-    """Initialize the NList.
+    """Initialize NList either from another multidimensional structure
+    or by shape and default value.
+
+    :param other: Either an another NList or a nested sequence to copy data from.
+        For instance, if other is [[1, 2, 3], [4, 5, 6]], a 2x3 NList will be
+        created with this data.
+    :param tuple shape: A tuple of dimension sizes. E.g. (2, 3) for 2x3 NList.
+    :param default: A value to fill the NList with when `shape` is passed.
+
+    `other` and `shape`/`default` arguments are mutually exclusive
     """
     def __init__(self, other=None, shape=None, default=None):
         if other is not None:
@@ -73,14 +107,17 @@ class NList:
 
     @property
     def shape(self):
+        """A tuple with the NList's dimensions. Read-only."""
         return self._shape
 
     @property
     def rank(self):
+        """Number of the NList's dimensions. Read-only."""
         return len(self.shape)
 
     @property
     def size(self):
+        """Number of elements in the NList. Read-only."""
         return product(self.shape)
 
     def __bool__(self):
@@ -110,12 +147,27 @@ class NList:
         return repr(self)
 
     def copy(self):
+        """Returns a shallow copy of the NList.
+
+        :rtype: NList
+        """
         return type(self)(other=self)
 
     def count(self, value):
+        """Returns the number of occurrences of `value` in the NList.
+
+        :rtype: int
+        """
         return self._data.count(value)
 
     def keys(self, start=None, stop=None):
+        """Returns an iterable of all indexes valid for the NList.
+
+        :param tuple start: An index to start iteration from.
+        :param tuple stop: An index before which to stop iteration.
+
+        `start` and `stop` must be valid indexes for the NList, or `None`.
+        """
         if start is not None:
             self._check_index(start)
         else:
@@ -150,10 +202,21 @@ class NList:
             return None
 
     def enumerate(self):
+        """Return an iterable of all pairs (index, value) in the NList."""
         for key in self.keys():
             yield (key, self[key])
 
     def index(self, value, start=None, stop=None):
+        """Returns index of the first occurrence of `value` in the NList.
+
+        :param value: A value to search for.
+        :param tuple start: An index to start the search from.
+        :param tuple stop: An index before which to stop search.
+        :raises ValueError: If the value is not found.
+        :rtype: tuple
+
+        `start` and `stop` must be valid indexes for the NList, or `None`.
+        """
         for key in self.keys(start, stop):
             if self[key] == value:
                 return key
