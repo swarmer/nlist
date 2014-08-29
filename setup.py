@@ -13,7 +13,7 @@ setup(
     name='nlist',
     version=read_from('VERSION'),
     description='A lightweight multidimensional list in Python',
-    long_description='\n'.join(read_from('README.rst').splitlines()[3:]),
+    long_description=read_from('README.rst'),
     url='https://github.com/swarmer/nlist',
     author='Anton Barkovsky',
     author_email='anton@swarmer.me',
