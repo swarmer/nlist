@@ -18,7 +18,8 @@ Example code
 
 Installation
 ------------
-Just grab ``nlist.py``.
+``pip install nlist``
+Or just grab ``nlist.py``.
 
 
 License

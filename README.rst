@@ -18,7 +18,7 @@ Example code
 ::
 
     from nlist import NList
-    
+
     l = NList([[1, 2], [3, 4]])
     l[1, 0] = '42'
     print(l.index('42')) #=> (1, 0)
@@ -31,7 +31,8 @@ Documentation
 
 Installation
 ------------
-Just grab ``nlist.py``.
+``pip install nlist``
+Or just grab ``nlist.py``.
 
 
 License
