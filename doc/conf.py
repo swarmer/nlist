@@ -16,8 +16,6 @@
 import sys
 import os
 
-import version
-
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -56,10 +54,10 @@ copyright = '2014, Anton Barkovsky'
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
-project_dir = path.abspath('..')
+project_dir = os.path.abspath('..')
 
 def read_from(filename):
-    with open(path.join(project_dir, filename), encoding='utf-8') as f:
+    with open(os.path.join(project_dir, filename), encoding='utf-8') as f:
         return f.read()
 
 # The short X.Y version.
