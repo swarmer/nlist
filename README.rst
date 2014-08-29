@@ -22,6 +22,11 @@ Example code
     print(l.index('42')) #=> (1, 0)
 
 
+Documentation
+-------------
+`<http://nlist.readthedocs.org/>`_
+
+
 Installation
 ------------
 Just grab ``nlist.py``.
