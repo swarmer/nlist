@@ -1,7 +1,8 @@
 nlist
 =====
-|travis|   |coveralls|
+|travis| |space| |coveralls|
 
+.. |space| unicode:: 0x200B
 .. |travis| image:: http://img.shields.io/travis/swarmer/nlist.svg
 .. |coveralls| image:: http://img.shields.io/coveralls/swarmer/nlist.svg
 
