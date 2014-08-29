@@ -1,8 +1,9 @@
 nlist
 =====
-.. image:: http://img.shields.io/travis/swarmer/nlist.svg
+|travis|   |coveralls|
 
-.. image:: http://img.shields.io/coveralls/swarmer/nlist.svg
+.. |travis| image:: http://img.shields.io/travis/swarmer/nlist.svg
+.. |coveralls| image:: http://img.shields.io/coveralls/swarmer/nlist.svg
 
 nlist is a lightweight multidimensional list in Python.
 
