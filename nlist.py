@@ -19,6 +19,8 @@ def group_every_n(l, n):
 
 
 class NList:
+    """Initialize the NList.
+    """
     def __init__(self, other=None, shape=None, default=None):
         if other is not None:
             if shape is not None or default is not None:
